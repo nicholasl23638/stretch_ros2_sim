@@ -1,0 +1,26 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_ros2_sim/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_nav2/local/lib/python3.10/dist-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_funmap/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_calibration/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_demos/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_deep_perception/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_core/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/hello_helpers/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_ros2_sim/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_nav2/local/lib/python3.10/dist-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_funmap/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_calibration/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_demos/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_deep_perception/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/stretch_core/lib/python3.10/site-packages",
+        "/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_ws/install/hello_helpers/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}
