@@ -56,5 +56,5 @@ ros2 run stretch_ros2_sim bridge_node
 Go to another shell
 ```
 source /opt/ros/humble/setup.bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
+ros2 launch stretch_ros2_sim stretch_gamepad.launch.yaml
 ```
