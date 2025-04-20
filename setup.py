@@ -1,6 +1,15 @@
 from setuptools import find_packages, setup
+import os
+from glob import glob
 
 package_name = 'stretch_ros2_sim'
+
+launch_files = glob(os.path.join('launch', '*launch.[pxy][yma]*'))
+executables = glob(os.path.join(package_name, "*_node.py"))
+
+def console_script(filename: str) -> str:
+    name = filename[len(package_name)+1:len(filename)-3]
+    return f"{name} = {package_name}.{name}:main"
 
 setup(
     name=package_name,
@@ -10,6 +19,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ("share/" + package_name + "/launch", launch_files),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -18,9 +28,7 @@ setup(
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
-    entry_points={
-        'console_scripts': [
-            'bridge_node = stretch_ros2_sim.bridge_node:main'
-        ],
+    entry_points= {
+        "console_scripts": list(map(console_script, executables)),
     },
 )

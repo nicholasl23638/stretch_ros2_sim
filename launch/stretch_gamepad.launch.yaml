@@ -1,0 +1,11 @@
+launch:
+
+- node:
+    pkg: "joy"
+    exec: "joy_node"
+    name: "joy_node"
+
+- node:
+    pkg: "stretch_ros2_sim"
+    exec: "joy_to_stretch_gamepad_node"
+    name: "joy_to_stretch_gamepad_node"
