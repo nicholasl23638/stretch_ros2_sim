@@ -42,8 +42,8 @@ class JoyToStretchGamepad(Node):
     
     def update_gamepad_callback(self, msg : Joy):
         # self.get_logger().log("recieved Joy msg!", LoggingSeverity.INFO)
-        if (self.last_msg.axes == msg.axes and self.last_msg.buttons == msg.buttons):
-            return
+        # if (self.last_msg.axes == msg.axes and self.last_msg.buttons == msg.buttons):
+        #     return
         
         # Buttons:
         # 0 : A
@@ -63,17 +63,17 @@ class JoyToStretchGamepad(Node):
 
         if (msg.buttons[0]):
             # lift down - A
-            joints_pub.data[Idx.LIFT] = -1.0
+            joints_pub.data[Idx.LIFT] = -0.1
         elif (msg.buttons[3]):
             # lift up - Y
-            joints_pub.data[Idx.LIFT] = 1.0
+            joints_pub.data[Idx.LIFT] = 0.1
 
         if (msg.buttons[2]):
             # arm in / left - X
-            joints_pub.data[Idx.ARM] = -1.0
+            joints_pub.data[Idx.ARM] = -0.1
         elif (msg.buttons[1]):
             # arm out / right - B
-            joints_pub.data[Idx.ARM] = 1.0
+            joints_pub.data[Idx.ARM] = 0.1
         
         # update is_wrist_ctrl - RMiddle Button
         if (self.last_msg.buttons[7] != msg.buttons[7] and msg.buttons[7] == 1):
@@ -84,10 +84,10 @@ class JoyToStretchGamepad(Node):
         # gripper control
         if (msg.buttons[4]):
             # grip in
-            joints_pub.data[Idx.GRIPPER] = -1.0
+            joints_pub.data[Idx.GRIPPER] = -0.1
         elif (msg.buttons[5]):
             # grip out
-            joints_pub.data[Idx.GRIPPER] = 1.0
+            joints_pub.data[Idx.GRIPPER] = 0.1
         
         # Axes:
         # 0: LJoyX
@@ -104,29 +104,29 @@ class JoyToStretchGamepad(Node):
 
             # wrist yaw
             if (msg.axes[6] > 0.0):
-                joints_pub.data[Idx.WRIST_YAW] = 1.0
+                joints_pub.data[Idx.WRIST_YAW] = 0.1
             elif (msg.axes[6] < 0.0):
-                joints_pub.data[Idx.WRIST_YAW] = -1.0
+                joints_pub.data[Idx.WRIST_YAW] = -0.1
 
             # wrist pitch
             if (msg.axes[7] > 0.0):
-                joints_pub.data[Idx.WRIST_PITCH] = 1.0
+                joints_pub.data[Idx.WRIST_PITCH] = 0.1
             elif (msg.axes[7] < 0.0):
-                joints_pub.data[Idx.WRIST_PITCH] = -1.0
+                joints_pub.data[Idx.WRIST_PITCH] = -0.1
         else:
             # head control
 
             # head pan
             if (msg.axes[6] > 0.0):
-                joints_pub.data[Idx.HEAD_PAN] = 1.0
+                joints_pub.data[Idx.HEAD_PAN] = 0.1
             elif (msg.axes[6] < 0.0):
-                joints_pub.data[Idx.HEAD_PAN] = -1.0
+                joints_pub.data[Idx.HEAD_PAN] = -0.1
 
             # head tilt
             if (msg.axes[7] > 0.0):
-                joints_pub.data[Idx.HEAD_TILT] = 1.0
+                joints_pub.data[Idx.HEAD_TILT] = 0.1
             elif (msg.axes[7] < 0.0):
-                joints_pub.data[Idx.HEAD_TILT] = -1.0
+                joints_pub.data[Idx.HEAD_TILT] = -0.1
 
         self.joint_pose_pub.publish(joints_pub)
 

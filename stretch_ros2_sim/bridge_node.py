@@ -77,7 +77,7 @@ class StretchMujocoBridge(Node):
         # self.create_subscription(Joy, "gamepad_joy", self.set_gamepad_motion_callback, 1)
 
         # TODO make this a config
-        self.robot_mode = "gamepad"
+        self.mode = "velocity"
 
         # Poses
         self.robot_sim.home()
@@ -98,14 +98,24 @@ class StretchMujocoBridge(Node):
     
     def joints_cmd_callback(self, msg: Float64MultiArray):
         """Receives joint commands and applies them to the PyBullet object."""
-        self.robot_sim.move_to("arm", msg.data[Idx.ARM])
-        self.robot_sim.move_to("lift", msg.data[Idx.LIFT])
-        self.robot_sim.move_to('wrist_yaw', msg.data[Idx.WRIST_YAW])
-        self.robot_sim.move_to('wrist_pitch', msg.data[Idx.WRIST_PITCH])
-        self.robot_sim.move_to('wrist_roll', msg.data[Idx.WRIST_ROLL])
-        self.robot_sim.move_to('head_pan', msg.data[Idx.HEAD_PAN])
-        self.robot_sim.move_to('head_tilt', msg.data[Idx.HEAD_TILT])
-        self.robot_sim.move_to('gripper', msg.data[Idx.GRIPPER])
+        if (self.mode == 'velocity'):
+            self.robot_sim.move_by("arm", msg.data[Idx.ARM])
+            self.robot_sim.move_by("lift", msg.data[Idx.LIFT])
+            self.robot_sim.move_by('wrist_yaw', msg.data[Idx.WRIST_YAW])
+            self.robot_sim.move_by('wrist_pitch', msg.data[Idx.WRIST_PITCH])
+            self.robot_sim.move_by('wrist_roll', msg.data[Idx.WRIST_ROLL])
+            self.robot_sim.move_by('head_pan', msg.data[Idx.HEAD_PAN])
+            self.robot_sim.move_by('head_tilt', msg.data[Idx.HEAD_TILT])
+            self.robot_sim.move_by('gripper', msg.data[Idx.GRIPPER])
+        else:
+            self.robot_sim.move_to("arm", msg.data[Idx.ARM])
+            self.robot_sim.move_to("lift", msg.data[Idx.LIFT])
+            self.robot_sim.move_to('wrist_yaw', msg.data[Idx.WRIST_YAW])
+            self.robot_sim.move_to('wrist_pitch', msg.data[Idx.WRIST_PITCH])
+            self.robot_sim.move_to('wrist_roll', msg.data[Idx.WRIST_ROLL])
+            self.robot_sim.move_to('head_pan', msg.data[Idx.HEAD_PAN])
+            self.robot_sim.move_to('head_tilt', msg.data[Idx.HEAD_TILT])
+            self.robot_sim.move_to('gripper', msg.data[Idx.GRIPPER])
 
     def drive_callback(self, msg : Twist):
         # Base Velocity control
