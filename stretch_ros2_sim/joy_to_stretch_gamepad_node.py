@@ -40,11 +40,7 @@ class JoyToStretchGamepad(Node):
         self.base_vel_pub = self.create_publisher(Twist, 'cmd_vel', 1)
         self.joint_pose_pub = self.create_publisher(Float64MultiArray, 'joint_pose_cmd', 1)
     
-    def update_gamepad_callback(self, msg : Joy):
-        # self.get_logger().log("recieved Joy msg!", LoggingSeverity.INFO)
-        # if (self.last_msg.axes == msg.axes and self.last_msg.buttons == msg.buttons):
-        #     return
-        
+    def update_gamepad_callback(self, msg : Joy):        
         # Buttons:
         # 0 : A
         # 1 : B
@@ -63,17 +59,17 @@ class JoyToStretchGamepad(Node):
 
         if (msg.buttons[0]):
             # lift down - A
-            joints_pub.data[Idx.LIFT] = -0.1
+            joints_pub.data[Idx.LIFT] = -0.7
         elif (msg.buttons[3]):
             # lift up - Y
-            joints_pub.data[Idx.LIFT] = 0.1
+            joints_pub.data[Idx.LIFT] = 0.7
 
         if (msg.buttons[2]):
             # arm in / left - X
-            joints_pub.data[Idx.ARM] = -0.1
+            joints_pub.data[Idx.ARM] = -1
         elif (msg.buttons[1]):
             # arm out / right - B
-            joints_pub.data[Idx.ARM] = 0.1
+            joints_pub.data[Idx.ARM] = 1
         
         # update is_wrist_ctrl - RMiddle Button
         if (self.last_msg.buttons[7] != msg.buttons[7] and msg.buttons[7] == 1):
@@ -84,10 +80,10 @@ class JoyToStretchGamepad(Node):
         # gripper control
         if (msg.buttons[4]):
             # grip in
-            joints_pub.data[Idx.GRIPPER] = -0.1
+            joints_pub.data[Idx.GRIPPER] = -0.5
         elif (msg.buttons[5]):
             # grip out
-            joints_pub.data[Idx.GRIPPER] = 0.1
+            joints_pub.data[Idx.GRIPPER] = 0.5
         
         # Axes:
         # 0: LJoyX
@@ -104,15 +100,15 @@ class JoyToStretchGamepad(Node):
 
             # wrist yaw
             if (msg.axes[6] > 0.0):
-                joints_pub.data[Idx.WRIST_YAW] = 0.1
+                joints_pub.data[Idx.WRIST_YAW] = 0.5
             elif (msg.axes[6] < 0.0):
-                joints_pub.data[Idx.WRIST_YAW] = -0.1
+                joints_pub.data[Idx.WRIST_YAW] = -0.5
 
             # wrist pitch
             if (msg.axes[7] > 0.0):
-                joints_pub.data[Idx.WRIST_PITCH] = 0.1
+                joints_pub.data[Idx.WRIST_PITCH] = 0.5
             elif (msg.axes[7] < 0.0):
-                joints_pub.data[Idx.WRIST_PITCH] = -0.1
+                joints_pub.data[Idx.WRIST_PITCH] = -0.5
         else:
             # head control
 
@@ -131,8 +127,8 @@ class JoyToStretchGamepad(Node):
         self.joint_pose_pub.publish(joints_pub)
 
         base_pub = Twist()
-        base_pub.linear.x = msg.axes[1] * 6
-        base_pub.angular.z = msg.axes[3] * 6
+        base_pub.linear.x = msg.axes[1] * 3
+        base_pub.angular.z = msg.axes[3] * 3
         self.base_vel_pub.publish(base_pub)
 
         self.last_msg = msg

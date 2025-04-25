@@ -12,7 +12,7 @@ import sys
 import numpy as np
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
-# from tf_transformations import quaternion_from_euler
+from tf_transformations import quaternion_from_euler
 
 from stretch_mujoco.stretch_mujoco import StretchMujocoSimulator
 from stretch_mujoco.robocasa_gen import model_generation_wizard
@@ -36,6 +36,9 @@ class StretchMujocoBridge(Node):
         super().__init__('stretch_mujoco_bridge')
         self.img_tools = ImageTools()
 
+        # TODO make this a config to choose vel xml
+        self.mode = "pos"
+
         # self.model, self.xml, self.dict = model_generation_wizard()
         self.robot_sim = StretchMujocoSimulator(scene_xml_path='/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_mujoco/stretch_mujoco/models/tippetop.xml')
         self.robot_sim.start()
@@ -50,14 +53,6 @@ class StretchMujocoBridge(Node):
         self.mode_pub = self.create_publisher(String, 'mode', 1)
         # self.tool_pub = self.create_publisher(String, 'tool', 1)
         self.streaming_position_mode_pub = self.create_publisher(Bool, 'is_streaming_position', 1)
-
-        # self.imu_mobile_base_pub = self.create_publisher(Imu, 'imu_mobile_base', 1)
-        # self.magnetometer_mobile_base_pub = self.create_publisher(MagneticField, 'magnetometer_mobile_base', 1)
-        # self.imu_wrist_pub = self.create_publisher(Imu, 'imu_wrist', 1)
-        # self.runstop_event_pub = self.create_publisher(Bool, 'is_runstopped', 1)
-        
-        # self.is_gamepad_dongle_pub = self.create_publisher(Bool,'is_gamepad_dongle', 1)
-        # self.gamepad_state_pub = self.create_publisher(Joy,'stretch_gamepad_state', 1) # decode using gamepad_conversion.unpack_joy_to_gamepad_state() on client side
         
         self.joint_state_pub = self.create_publisher(JointState, 'joint_states', 1)
 
@@ -69,19 +64,15 @@ class StretchMujocoBridge(Node):
         self.cam_d405_K_pub = self.create_publisher(Image, 'cam_d405_K', 1)
         self.cam_d435i_K_pub = self.create_publisher(Image, 'cam_d435i_K', 1)
 
-        # self.joint_limits_pub = self.create_publisher(JointState, 'joint_limits', 1)
 
         self.create_subscription(Twist, "cmd_vel", self.drive_callback, 1)
         self.create_subscription(Float64MultiArray, "joint_pose_cmd", self.joints_cmd_callback, 1)
         # self.create_subscription(JointTrajectory, "joint_trajectory", self.trajectory_cmd_callback, 1)
-        # self.create_subscription(Joy, "gamepad_joy", self.set_gamepad_motion_callback, 1)
 
-        # TODO make this a config
-        self.mode = "velocity"
 
-        # Poses
-        self.robot_sim.home()
-        self.robot_sim.stow()
+        # Poses CAN'T SET WHEN USING VEL MODE
+        # self.robot_sim.home()
+        # self.robot_sim.stow()
 
         # Init conditions
         pub = Bool()
@@ -98,24 +89,14 @@ class StretchMujocoBridge(Node):
     
     def joints_cmd_callback(self, msg: Float64MultiArray):
         """Receives joint commands and applies them to the PyBullet object."""
-        if (self.mode == 'velocity'):
-            self.robot_sim.move_by("arm", msg.data[Idx.ARM])
-            self.robot_sim.move_by("lift", msg.data[Idx.LIFT])
-            self.robot_sim.move_by('wrist_yaw', msg.data[Idx.WRIST_YAW])
-            self.robot_sim.move_by('wrist_pitch', msg.data[Idx.WRIST_PITCH])
-            self.robot_sim.move_by('wrist_roll', msg.data[Idx.WRIST_ROLL])
-            self.robot_sim.move_by('head_pan', msg.data[Idx.HEAD_PAN])
-            self.robot_sim.move_by('head_tilt', msg.data[Idx.HEAD_TILT])
-            self.robot_sim.move_by('gripper', msg.data[Idx.GRIPPER])
-        else:
-            self.robot_sim.move_to("arm", msg.data[Idx.ARM])
-            self.robot_sim.move_to("lift", msg.data[Idx.LIFT])
-            self.robot_sim.move_to('wrist_yaw', msg.data[Idx.WRIST_YAW])
-            self.robot_sim.move_to('wrist_pitch', msg.data[Idx.WRIST_PITCH])
-            self.robot_sim.move_to('wrist_roll', msg.data[Idx.WRIST_ROLL])
-            self.robot_sim.move_to('head_pan', msg.data[Idx.HEAD_PAN])
-            self.robot_sim.move_to('head_tilt', msg.data[Idx.HEAD_TILT])
-            self.robot_sim.move_to('gripper', msg.data[Idx.GRIPPER])
+        self.robot_sim.move_to("arm", msg.data[Idx.ARM])
+        self.robot_sim.move_to("lift", msg.data[Idx.LIFT])
+        self.robot_sim.move_to('wrist_yaw', msg.data[Idx.WRIST_YAW])
+        self.robot_sim.move_to('wrist_pitch', msg.data[Idx.WRIST_PITCH])
+        self.robot_sim.move_to('wrist_roll', msg.data[Idx.WRIST_ROLL])
+        self.robot_sim.move_to('head_pan', msg.data[Idx.HEAD_PAN])
+        self.robot_sim.move_to('head_tilt', msg.data[Idx.HEAD_TILT])
+        self.robot_sim.move_to('gripper', msg.data[Idx.GRIPPER])
 
     def drive_callback(self, msg : Twist):
         # Base Velocity control
@@ -151,12 +132,6 @@ class StretchMujocoBridge(Node):
         # odom.pose.pose.position.x = x
         # odom.pose.pose.position.y = y
 
-        # q = quaternion_from_euler(0.0, 0.0, theta)
-        # odom.pose.pose.orientation.x = q[0]
-        # odom.pose.pose.orientation.y = q[1]
-        # odom.pose.pose.orientation.z = q[2]
-        # odom.pose.pose.orientation.w = q[3]
-
         # odom.twist.twist.linear.x = x_vel
         # odom.twist.twist.linear.y = y_vel
         # odom.twist.twist.angular.z = theta_vel
@@ -167,7 +142,13 @@ class StretchMujocoBridge(Node):
         pose_msg.pose.pose = Pose()
         pose_msg.pose.pose.position.x = self.robot_sim.get_base_pose()[0]
         pose_msg.pose.pose.position.y = self.robot_sim.get_base_pose()[1]
-        pose_msg.pose.pose.orientation.z = self.robot_sim.get_base_pose()[2]
+
+        q = quaternion_from_euler(0.0, 0.0, self.robot_sim.get_base_pose()[2])
+        pose_msg.pose.pose.orientation.x = q[0]
+        pose_msg.pose.pose.orientation.y = q[1]
+        pose_msg.pose.pose.orientation.z = q[2]
+        pose_msg.pose.pose.orientation.w = q[3]
+
         self.odom_pub.publish(pose_msg)
 
         ### - - - - - - - - - - - - - - - - -  Publish joint state for the arm - - - - - - - - - - - - - - - - - ###
