@@ -65,8 +65,8 @@ class StretchMujocoBridge(Node):
         self.cam_d435i_K_pub = self.create_publisher(Image, 'cam_d435i_K', 1)
 
 
-        self.create_subscription(Twist, "cmd_vel", self.drive_callback, 1)
-        self.create_subscription(Float64MultiArray, "joint_pose_cmd", self.joints_cmd_callback, 1)
+        self.create_subscription(Twist, "/stretch/cmd_vel", self.drive_callback, 1)
+        self.create_subscription(Float64MultiArray, "/joint_pose_cmd", self.joints_cmd_callback, 1)
         # self.create_subscription(JointTrajectory, "joint_trajectory", self.trajectory_cmd_callback, 1)
 
 

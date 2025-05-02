@@ -32,13 +32,18 @@ class JoyToStretchGamepad(Node):
 
         # if False, Dpad controls head, else Dpad controls wrist
         self.is_wrist_ctrl = True
+        self.need_aggregator = True
+        self.base_pub = Twist()
+        self.joints_pub = Float64MultiArray()
+        self.joints_pub.data = [0.0] * 10
 
         # self.create_subscription(Twist, "cmd_vel", self.drive_callback, 1)
         self.sub = self.create_subscription(Joy, '/joy', self.update_gamepad_callback, 10)
         self.get_logger().info("Subscriber for /joy topic created")
 
-        self.base_vel_pub = self.create_publisher(Twist, 'cmd_vel', 1)
-        self.joint_pose_pub = self.create_publisher(Float64MultiArray, 'joint_pose_cmd', 1)
+        self.base_vel_pub = self.create_publisher(Twist, '/stretch/cmd_vel', 1)
+        self.joint_pose_pub = self.create_publisher(Float64MultiArray, '/joint_pose_cmd', 1)
+        self.timer = self.create_timer(0.05, self.publish_topics)  # 20Hz control loop
     
     def update_gamepad_callback(self, msg : Joy):        
         # Buttons:
@@ -54,22 +59,22 @@ class JoyToStretchGamepad(Node):
         # 9 : LJoyPress
         # 10 : RJoyPress
 
-        joints_pub = Float64MultiArray()
-        joints_pub.data = [0.0] * 10
+        self.joints_pub = Float64MultiArray()
+        self.joints_pub.data = [0.0] * 10
 
         if (msg.buttons[0]):
             # lift down - A
-            joints_pub.data[Idx.LIFT] = -0.7
+            self.joints_pub.data[Idx.LIFT] = -0.7
         elif (msg.buttons[3]):
             # lift up - Y
-            joints_pub.data[Idx.LIFT] = 0.7
+            self.joints_pub.data[Idx.LIFT] = 0.7
 
         if (msg.buttons[2]):
             # arm in / left - X
-            joints_pub.data[Idx.ARM] = -1
+            self.joints_pub.data[Idx.ARM] = -1
         elif (msg.buttons[1]):
             # arm out / right - B
-            joints_pub.data[Idx.ARM] = 1
+            self.joints_pub.data[Idx.ARM] = 1
         
         # update is_wrist_ctrl - RMiddle Button
         if (self.last_msg.buttons[7] != msg.buttons[7] and msg.buttons[7] == 1):
@@ -80,10 +85,10 @@ class JoyToStretchGamepad(Node):
         # gripper control
         if (msg.buttons[4]):
             # grip in
-            joints_pub.data[Idx.GRIPPER] = -0.5
+            self.joints_pub.data[Idx.GRIPPER] = -0.5
         elif (msg.buttons[5]):
             # grip out
-            joints_pub.data[Idx.GRIPPER] = 0.5
+            self.joints_pub.data[Idx.GRIPPER] = 0.5
         
         # Axes:
         # 0: LJoyX
@@ -100,38 +105,44 @@ class JoyToStretchGamepad(Node):
 
             # wrist yaw
             if (msg.axes[6] > 0.0):
-                joints_pub.data[Idx.WRIST_YAW] = 0.5
+                self.joints_pub.data[Idx.WRIST_YAW] = 0.5
             elif (msg.axes[6] < 0.0):
-                joints_pub.data[Idx.WRIST_YAW] = -0.5
+                self.joints_pub.data[Idx.WRIST_YAW] = -0.5
 
             # wrist pitch
             if (msg.axes[7] > 0.0):
-                joints_pub.data[Idx.WRIST_PITCH] = 0.5
+                self.joints_pub.data[Idx.WRIST_PITCH] = 0.5
             elif (msg.axes[7] < 0.0):
-                joints_pub.data[Idx.WRIST_PITCH] = -0.5
+                self.joints_pub.data[Idx.WRIST_PITCH] = -0.5
         else:
             # head control
 
             # head pan
             if (msg.axes[6] > 0.0):
-                joints_pub.data[Idx.HEAD_PAN] = 0.1
+                self.joints_pub.data[Idx.HEAD_PAN] = 0.1
             elif (msg.axes[6] < 0.0):
-                joints_pub.data[Idx.HEAD_PAN] = -0.1
+                self.joints_pub.data[Idx.HEAD_PAN] = -0.1
 
             # head tilt
             if (msg.axes[7] > 0.0):
-                joints_pub.data[Idx.HEAD_TILT] = 0.1
+                self.joints_pub.data[Idx.HEAD_TILT] = 0.1
             elif (msg.axes[7] < 0.0):
-                joints_pub.data[Idx.HEAD_TILT] = -0.1
+                self.joints_pub.data[Idx.HEAD_TILT] = -0.1
 
-        self.joint_pose_pub.publish(joints_pub)
+        # self.joint_pose_pub.publish(self.joints_pub)
 
-        base_pub = Twist()
-        base_pub.linear.x = msg.axes[1] * 3
-        base_pub.angular.z = msg.axes[3] * 3
-        self.base_vel_pub.publish(base_pub)
+        self.base_pub = Twist()
+        self.base_pub.linear.x = msg.axes[1] * 3
+        self.base_pub.angular.z = msg.axes[3] * 3
+        # self.base_vel_pub.publish(self.base_pub)
 
         self.last_msg = msg
+
+    def publish_topics(self):
+        # if (self.need_aggregator):
+        self.base_vel_pub.publish(self.base_pub)
+        self.joint_pose_pub.publish(self.joints_pub)
+
 
 def main(args=None):
     rclpy.init(args=args)
