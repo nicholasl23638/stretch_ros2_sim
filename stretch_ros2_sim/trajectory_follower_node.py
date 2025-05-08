@@ -159,10 +159,11 @@ class TrajectoryFollower(Node):
         steering_angle = target_angle - yaw
         
         # Normalize the steering angle
-        while steering_angle > math.pi:
-            steering_angle -= 2 * math.pi
-        while steering_angle < -math.pi:
-            steering_angle += 2 * math.pi
+        steering_angle = (steering_angle + math.pi) % (2 * math.pi) - math.pi
+        #while steering_angle > math.pi:
+        #    steering_angle -= 2 * math.pi
+        #while steering_angle < -math.pi:
+        #    steering_angle += 2 * math.pi
         
         # Calculate the distance to the target
         distance = self.calculate_distance(robot_position, target_point)
@@ -170,6 +171,15 @@ class TrajectoryFollower(Node):
         # Apply pure pursuit control law
         # Linear velocity is constant or proportional to distance
         linear_velocity = min(self.max_linear_speed, 0.5 * distance)
+
+        if abs(steering_angle) > math.pi / 2:
+            linear_velocity *= -1
+            if steering_angle > 0:
+                steering_angle -= math.pi
+            else:
+                steering_angle += math.pi
+            # Normalize again in case the angle wraps
+            steering_angle = (steering_angle + math.pi) % (2 * math.pi) - math.pi
         
         # Angular velocity is proportional to the steering angle
         angular_velocity = self.k_gain * steering_angle
@@ -323,9 +333,9 @@ class TrajectoryGenerator(Node):
             (0, 0),
             # (self.side_length / 3, 0),
             # (self.side_length / 3 * 2, 0),
-            (self.side_length, 0),
+            (-self.side_length, 0),
             (self.side_length, self.side_length),
-            (0, self.side_length)
+            (0, -self.side_length)
         ]
         
         # Add the first corner again to close the square
