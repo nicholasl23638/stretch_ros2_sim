@@ -13,6 +13,9 @@ import numpy as np
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 from tf_transformations import quaternion_from_euler
+from ament_index_python.packages import get_package_share_directory
+import os
+
 
 from stretch_mujoco import StretchMujocoSimulator
 from stretch_mujoco.robocasa_gen import model_generation_wizard
@@ -40,7 +43,9 @@ class StretchMujocoBridge(Node):
         self.mode = "pos"
 
         # self.model, self.xml, self.dict = model_generation_wizard()
-        self.robot_sim = StretchMujocoSimulator(scene_xml_path='/home/ardenk14/ros_humble_ws/src/stretch_ros2_sim/xml/tippetop.xml')
+        package_share_directory = get_package_share_directory('stretch_ros2_sim')
+        file_path = os.path.join(package_share_directory, 'xml', 'tippetop.xml')
+        self.robot_sim = StretchMujocoSimulator(scene_xml_path=file_path)
         self.robot_sim.start()
         # robot_sim = StretchMujocoSimulator('./scene.xml')
         # robot_sim.start() # This will start the simulation and open Mujoco-Viewer window

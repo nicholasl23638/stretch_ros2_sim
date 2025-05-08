@@ -20,6 +20,8 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ("share/" + package_name + "/launch", launch_files),
+        ('share/' + package_name + '/xml', glob('xml/*.xml')),
+        ('share/' + package_name + '/xml/assets', glob('xml/assets/**/*', recursive=True)),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
