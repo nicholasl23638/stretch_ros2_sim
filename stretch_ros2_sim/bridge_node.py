@@ -14,7 +14,7 @@ import cv2
 from cv_bridge import CvBridge, CvBridgeError
 from tf_transformations import quaternion_from_euler
 
-from stretch_mujoco.stretch_mujoco import StretchMujocoSimulator
+from stretch_mujoco import StretchMujocoSimulator
 from stretch_mujoco.robocasa_gen import model_generation_wizard
 
 class Idx:
@@ -40,7 +40,7 @@ class StretchMujocoBridge(Node):
         self.mode = "pos"
 
         # self.model, self.xml, self.dict = model_generation_wizard()
-        self.robot_sim = StretchMujocoSimulator(scene_xml_path='/home/ginget/ROBOTICS_STUFF/KAVRAKI_LAB/stretch_mujoco/stretch_mujoco/models/tippetop.xml')
+        self.robot_sim = StretchMujocoSimulator(scene_xml_path='/home/ardenk14/ros_humble_ws/src/stretch_ros2_sim/xml/tippetop.xml')
         self.robot_sim.start()
         # robot_sim = StretchMujocoSimulator('./scene.xml')
         # robot_sim.start() # This will start the simulation and open Mujoco-Viewer window
@@ -161,15 +161,17 @@ class StretchMujocoBridge(Node):
         # joint moves all the other joints in the global frame.
         joint_state.name = ['wrist_extension', 'joint_lift', 'joint_arm_l3', 'joint_arm_l2', 'joint_arm_l1', 'joint_arm_l0']
 
-        arm_state = self.robot_sim.status.get('arm')
-        pos_out = arm_state.get('pos')
-        vel_out = arm_state.get('vel')
-        eff_out = arm_state.get('pos') # TODO PLACEHOLDER - I doubt we're gonna need this tho
+        status = self.robot_sim.pull_status() # Makes this code compatible with latest updates in simulator
 
-        lift_state = self.robot_sim.status.get('lift')
-        pos_up = lift_state.get('pos')
-        vel_up = lift_state.get('vel')
-        eff_up = lift_state.get('pos')
+        arm_state = status.__getitem__('arm') # Makes this code compatible with latest updates in simulator
+        pos_out = arm_state.pos
+        vel_out = arm_state.vel
+        eff_out = arm_state.pos # TODO PLACEHOLDER - I doubt we're gonna need this tho
+
+        lift_state = status.__getitem__('lift')
+        pos_up = lift_state.pos
+        vel_up = lift_state.vel
+        eff_up = lift_state.pos
         # set positions of the telescoping joints
         positions = [pos_out / 4.0 for i in range(4)]
         positions.insert(0, pos_up)
@@ -186,17 +188,17 @@ class StretchMujocoBridge(Node):
         # if self.use_robotis_head:
         head_joint_names = ['joint_head_pan', 'joint_head_tilt']
         joint_state.name.extend(head_joint_names)
-        head_pan_state = self.robot_sim.status.get('head_pan')
-        head_pan_rad = head_pan_state.get('pos')
-        head_pan_vel = head_pan_state.get('vel')
-        head_pan_effort = head_pan_state.get('pos') 
+        head_pan_state = status.__getitem__('head_pan')
+        head_pan_rad = head_pan_state.pos
+        head_pan_vel = head_pan_state.vel
+        head_pan_effort = head_pan_state.pos
         positions.append(head_pan_rad)
         velocities.append(head_pan_vel)
         efforts.append(head_pan_effort)
-        head_tilt_state = self.robot_sim.status.get('head_tilt')
-        head_tilt_rad = head_tilt_state.get('pos')
-        head_tilt_vel = head_tilt_state.get('vel')
-        head_tilt_effort = head_tilt_state.get('pos') 
+        head_tilt_state = status.__getitem__('head_tilt')
+        head_tilt_rad = head_tilt_state.pos
+        head_tilt_vel = head_tilt_state.vel
+        head_tilt_effort = head_tilt_state.pos 
         positions.append(head_tilt_rad)
         velocities.append(head_tilt_vel)
         efforts.append(head_tilt_effort)
@@ -205,35 +207,35 @@ class StretchMujocoBridge(Node):
         end_of_arm_joint_names = ['joint_wrist_yaw', 'joint_wrist_pitch', 'joint_wrist_roll']
         end_of_arm_joint_names = end_of_arm_joint_names + ['joint_gripper_finger_left', 'joint_gripper_finger_right']
         joint_state.name.extend(end_of_arm_joint_names)
-        wrist_yaw_state = self.robot_sim.status.get('wrist_yaw')
-        wrist_yaw_rad = wrist_yaw_state.get('pos')
-        wrist_yaw_vel = wrist_yaw_state.get('vel')
-        wrist_yaw_effort = wrist_yaw_state.get('pos') 
+        wrist_yaw_state = status.__getitem__('wrist_yaw')
+        wrist_yaw_rad = wrist_yaw_state.pos
+        wrist_yaw_vel = wrist_yaw_state.vel
+        wrist_yaw_effort = wrist_yaw_state.pos
         positions.append(wrist_yaw_rad)
         velocities.append(wrist_yaw_vel)
         efforts.append(wrist_yaw_effort)
 
         # if dex_wrist_attached:
-        wrist_pitch_state = self.robot_sim.status.get('wrist_pitch')
-        wrist_pitch_rad = wrist_pitch_state.get('pos')
-        wrist_pitch_vel = wrist_pitch_state.get('vel')
-        wrist_pitch_effort = wrist_pitch_state.get('pos') 
+        wrist_pitch_state = status.__getitem__('wrist_pitch')
+        wrist_pitch_rad = wrist_pitch_state.pos
+        wrist_pitch_vel = wrist_pitch_state.vel
+        wrist_pitch_effort = wrist_pitch_state.pos
         positions.append(wrist_pitch_rad)
         velocities.append(wrist_pitch_vel)
         efforts.append(wrist_pitch_effort)
-        wrist_roll_state = self.robot_sim.status.get('wrist_roll')
-        wrist_roll_rad = wrist_roll_state.get('pos')
-        wrist_roll_vel = wrist_roll_state.get('vel')
-        wrist_roll_effort = wrist_roll_state.get('pos') 
+        wrist_roll_state = status.__getitem__('wrist_roll')
+        wrist_roll_rad = wrist_roll_state.pos
+        wrist_roll_vel = wrist_roll_state.vel
+        wrist_roll_effort = wrist_roll_state.pos 
         positions.append(wrist_roll_rad)
         velocities.append(wrist_roll_vel)
         efforts.append(wrist_roll_effort)
 
         # if 'stretch_gripper' in self.robot.end_of_arm.joints:
-        gripper_state = self.robot_sim.status.get('gripper')
-        gripper_finger_rad = gripper_state.get('pos')
-        gripper_finger_vel = gripper_state.get('vel')
-        gripper_finger_effort = gripper_state.get('pos') 
+        gripper_state = status.__getitem__('gripper')
+        gripper_finger_rad = gripper_state.pos
+        gripper_finger_vel = gripper_state.vel
+        gripper_finger_effort = gripper_state.pos
         positions.append(gripper_finger_rad)
         velocities.append(gripper_finger_vel)
         efforts.append(gripper_finger_effort)
@@ -252,10 +254,13 @@ class StretchMujocoBridge(Node):
         # np.set_printoptions(threshold=sys.maxsize)
         camera_data = self.robot_sim.pull_camera_data()
         pub_data = Image()
-        cam_d405_rgb = np.array(camera_data.get('cam_d405_rgb'))
-        pub_data = self.img_tools.convert_cv2_to_ros_msg(cam_d405_rgb)
-        # self.get_logger().log(str(pub_data), LoggingSeverity.INFO)
-        self.cam_d405_rgb_pub.publish(pub_data)
+        cam_d405_rgb = np.array(camera_data.cam_d405_rgb)
+        try:
+            pub_data = self.img_tools.convert_cv2_to_ros_msg(cam_d405_rgb)
+            # self.get_logger().log(str(pub_data), LoggingSeverity.INFO)
+            self.cam_d405_rgb_pub.publish(pub_data)
+        except:
+            pass
 
         # pub_data.data = np.array(camera_data.get('cam_d405_depth')).flatten()
         # self.cam_d405_depth_pub.publish(pub_data)
